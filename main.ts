@@ -11,6 +11,7 @@ let timeLimit = 30
 let activePackages = 0
 let maxPackagesAtOnce = 2
 let gameTimer = 0
+let timeStatusText: TextSprite
 
 // Check if player has reached the next level
 function checkLevelProgression() {
@@ -181,7 +182,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Object, function (sprite, otherS
 // Handle time limit expiration
 game.onUpdateInterval(1000, function () {
     gameTimer += 1
-    info.setStatusBarLabel("Time: " + (timeLimit - gameTimer) + "s")
+    let timeRemaining = timeLimit - gameTimer
+    timeStatusText.setText("Time: " + timeRemaining + "s")
+    
     if (gameTimer >= timeLimit) {
         // Check if score meets level requirement
         if (info.score() >= scoreRequirements[currentLevel - 1]) {
@@ -192,16 +195,6 @@ game.onUpdateInterval(1000, function () {
             game.gameOver(false)
         }
     }
-})
-
-// Handle projectile leaving screen - decrease active package count
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Player, function (sprite, otherSprite) {
-    // Do nothing here
-})
-
-// Detect when projectiles are destroyed off-screen
-info.onScore(function (value) {
-    // This is handled in the overlap function above
 })
 
 scene.setBackgroundColor(7)
@@ -227,6 +220,10 @@ let car = sprites.create(img`
 tiles.placeOnRandomTile(car, myTiles.tile4)
 controller.moveSprite(car)
 scene.cameraFollowSprite(car)
+
+// Create text sprite for timer display
+timeStatusText = textSprite.create("Time: 30s")
+timeStatusText.setPosition(10, 10)
 
 // Display initial level info
 game.splash("High Stakes Mode!", "30 seconds, Max 2 packages")
