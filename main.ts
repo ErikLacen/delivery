@@ -6,6 +6,12 @@ namespace SpriteKind {
 let currentLevel = 1
 let scoreRequirements = [5, 10, 15]
 
+// High-stakes difficulty settings
+let timeLimit = 30
+let activePackages = 0
+let maxPackagesAtOnce = 2
+let gameTimer = 0
+
 // Check if player has reached the next level
 function checkLevelProgression() {
     if (currentLevel < scoreRequirements.length && info.score() >= scoreRequirements[currentLevel - 1]) {
@@ -26,7 +32,6 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . 3 3 3 3 3 3 . . . .
         . . . . . 3 3 d d 3 3 3 3 . . .
         . . . . . c d 3 3 3 3 3 c . . .
-        . . . . 3 c d 3 3 3 3 3 c 3 . .
         . . . a 3 c d 3 3 3 3 3 c 3 a .
         . . . f 3 c d 3 3 3 3 3 c 3 f .
         . . . f a c 3 3 3 3 3 3 c a f .
@@ -41,45 +46,55 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
         `)
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    let package1 = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . e e e e e e e . .
-        . . . . . . e d d d d d e e . .
-        . . . . . e d d d d d d e e . .
-        . . . . e d d d d d d e d e . .
-        . . . . e e e e e e e d d e . .
-        . . . . e d d d d d e d d e . .
-        . . . . e d d d d d e d d e . .
-        . . . . e d d d d d e d d e . .
-        . . . . e d d d d d e d e e . .
-        . . . . e d d d d d e e e . . .
-        . . . . e e e e e e e e . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        `, car, 0, 50)
+    // Only shoot if we haven't reached max packages
+    if (activePackages < maxPackagesAtOnce) {
+        let package1 = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . .
+            . . . . . . . e e e e e e e . .
+            . . . . . . e d d d d d e e . .
+            . . . . . e d d d d d d e e . .
+            . . . . e d d d d d d e d e . .
+            . . . . e e e e e e e d d e . .
+            . . . . e d d d d d e d d e . .
+            . . . . e d d d d d e d d e . .
+            . . . . e d d d d d e d d e . .
+            . . . . e d d d d d e d e e . .
+            . . . . e d d d d d e e e . . .
+            . . . . e e e e e e e e . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            `, car, 0, 50)
+        activePackages += 1
+        package1.data("package", true)
+    }
 })
 // Deliver packages up (A) or down (B)
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    let package2 = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . e e e e e e e . .
-        . . . . . . e d d d d d e e . .
-        . . . . . e d d d d d d e e . .
-        . . . . e d d d d d d e d e . .
-        . . . . e e e e e e e d d e . .
-        . . . . e d d d d d e d d e . .
-        . . . . e d d d d d e d d e . .
-        . . . . e d d d d d e d d e . .
-        . . . . e d d d d d e d e e . .
-        . . . . e d d d d d e e e . . .
-        . . . . e e e e e e e e . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        `, car, 0, -50)
+    // Only shoot if we haven't reached max packages
+    if (activePackages < maxPackagesAtOnce) {
+        let package2 = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . .
+            . . . . . . . e e e e e e e . .
+            . . . . . . e d d d d d e e . .
+            . . . . . e d d d d d d e e . .
+            . . . . e d d d d d d e d e . .
+            . . . . e e e e e e e d d e . .
+            . . . . e d d d d d e d d e . .
+            . . . . e d d d d d e d d e . .
+            . . . . e d d d d d e d d e . .
+            . . . . e d d d d d e d e e . .
+            . . . . e d d d d d e e e . . .
+            . . . . e e e e e e e e . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            `, car, 0, -50)
+        activePackages += 1
+        package2.data("package", true)
+    }
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     car.setImage(img`
@@ -148,6 +163,10 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Object, function (sprite, ot
     music.magicWand.play()
     sprite.destroy(effects.confetti, 500)
     info.changeScoreBy(1)
+    // Decrease active packages count
+    if (sprite.data("package")) {
+        activePackages -= 1
+    }
     checkLevelProgression()
 })
 // Lose a point for driving into a house
@@ -158,6 +177,33 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Object, function (sprite, otherS
     scene.cameraShake(2, 200)
     info.changeScoreBy(-1)
 })
+
+// Handle time limit expiration
+game.onUpdateInterval(1000, function () {
+    gameTimer += 1
+    info.setStatusBarLabel("Time: " + (timeLimit - gameTimer) + "s")
+    if (gameTimer >= timeLimit) {
+        // Check if score meets level requirement
+        if (info.score() >= scoreRequirements[currentLevel - 1]) {
+            game.splash("Success!", "Final Score: " + info.score())
+            game.gameOver(true)
+        } else {
+            game.splash("Time's Up!", "Need " + scoreRequirements[currentLevel - 1] + " score")
+            game.gameOver(false)
+        }
+    }
+})
+
+// Handle projectile leaving screen - decrease active package count
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Player, function (sprite, otherSprite) {
+    // Do nothing here
+})
+
+// Detect when projectiles are destroyed off-screen
+info.onScore(function (value) {
+    // This is handled in the overlap function above
+})
+
 scene.setBackgroundColor(7)
 tiles.setTilemap(tilemap`level`)
 let car = sprites.create(img`
@@ -183,6 +229,7 @@ controller.moveSprite(car)
 scene.cameraFollowSprite(car)
 
 // Display initial level info
+game.splash("High Stakes Mode!", "30 seconds, Max 2 packages")
 game.splash("Level 1", "Score requirement: 5")
 
 for (let value of tiles.getTilesByType(myTiles.tile1)) {
