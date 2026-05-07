@@ -11,7 +11,6 @@ let timeLimit = 30
 let activePackages = 0
 let maxPackagesAtOnce = 2
 let gameTimer = 0
-let timeStatusText: TextSprite
 
 // Check if player has reached the next level
 function checkLevelProgression() {
@@ -183,7 +182,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Object, function (sprite, otherS
 game.onUpdateInterval(1000, function () {
     gameTimer += 1
     let timeRemaining = timeLimit - gameTimer
-    timeStatusText.setText("Time: " + timeRemaining + "s")
+    
+    // Display time remaining using status bar
+    info.setLife(timeRemaining)
     
     if (gameTimer >= timeLimit) {
         // Check if score meets level requirement
@@ -221,9 +222,8 @@ tiles.placeOnRandomTile(car, myTiles.tile4)
 controller.moveSprite(car)
 scene.cameraFollowSprite(car)
 
-// Create text sprite for timer display
-timeStatusText = textSprite.create("Time: 30s")
-timeStatusText.setPosition(10, 10)
+// Initialize life to show time remaining
+info.setLife(timeLimit)
 
 // Display initial level info
 game.splash("High Stakes Mode!", "30 seconds, Max 2 packages")
