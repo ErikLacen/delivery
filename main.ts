@@ -1,6 +1,19 @@
 namespace SpriteKind {
     export const Object = SpriteKind.create()
 }
+
+// Game difficulty levels with score requirements
+let currentLevel = 1
+let scoreRequirements = [5, 10, 15]
+
+// Check if player has reached the next level
+function checkLevelProgression() {
+    if (currentLevel < scoreRequirements.length && info.score() >= scoreRequirements[currentLevel - 1]) {
+        currentLevel += 1
+        game.splash("Level " + currentLevel, "Score requirement: " + scoreRequirements[currentLevel - 1])
+    }
+}
+
 // Game over when you reach the end of the
 // neighborhood
 scene.onOverlapTile(SpriteKind.Player, myTiles.tile3, function (sprite, location) {
@@ -135,6 +148,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Object, function (sprite, ot
     music.magicWand.play()
     sprite.destroy(effects.confetti, 500)
     info.changeScoreBy(1)
+    checkLevelProgression()
 })
 // Lose a point for driving into a house
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Object, function (sprite, otherSprite) {
@@ -167,6 +181,10 @@ let car = sprites.create(img`
 tiles.placeOnRandomTile(car, myTiles.tile4)
 controller.moveSprite(car)
 scene.cameraFollowSprite(car)
+
+// Display initial level info
+game.splash("Level 1", "Score requirement: 5")
+
 for (let value of tiles.getTilesByType(myTiles.tile1)) {
     let myPurpleHouse = sprites.create(img`
         ....................8a8aa8a8....................
@@ -260,7 +278,7 @@ for (let value of tiles.getTilesByType(myTiles.tile2)) {
         6c622e22e22eeee22e22e2e22e2e22e22eeee22e22e226c6
         4cc22eeee22e22e22e22eee22eee22e22e22e22eeee22cc4
         46622e22e22e22eeee22e2e22e2e22eeee22e22e22e22664
-        46622e22eeee22e22eeee2e22e2eeee22e22eeee22e22664
+        46622e22eeee22e22eeee2e22e2eeee22e22e22eeee22e22664
         6c6eee22e22e22e22e22e2e22e2e22e22e22e22e22eee6c6
         4cc22e22e22eeee22e22e2e22e2e22e22eeee22e22e22cc4
         ...22eeee22e22e22e22eee22eee22e22e22e22eeee22...
